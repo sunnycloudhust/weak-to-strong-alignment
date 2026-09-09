@@ -149,9 +149,10 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
 
 
 if __name__ == "__main__":
+    reward_model_ref = CONFIG.get("reward_model_hf_repo", CONFIG["output_dir"])
     run_experiment(
         CONFIG,
-        Path(CONFIG["output_dir"]),
+        reward_model_ref,
         CONFIG["base_model_name"],
         CONFIG["max_test_samples"],
         Path(CONFIG["experiment_output_dir"]) / "results.json",

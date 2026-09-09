@@ -4,6 +4,7 @@ CONFIG = {
     "base_model_name": "Qwen/Qwen2.5-1.5B-Instruct",
     "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
+    "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "experiment_output_dir": "outputs/test_time_alignment",
     "gpu_ids": [0, 1],
     "max_length": 256,
