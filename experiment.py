@@ -65,8 +65,6 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
         base_tokenizer.pad_token = base_tokenizer.eos_token
     base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
     base_model.to(device)
-    if len(gpu_ids) > 1:
-        base_model = torch.nn.DataParallel(base_model, device_ids=gpu_ids)
     base_model.eval()
 
     reward_tokenizer = AutoTokenizer.from_pretrained(reward_model_path)
