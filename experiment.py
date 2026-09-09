@@ -54,7 +54,8 @@ def generate_candidates(model, tokenizer, prompt, count, config, device):
 
 
 def run_experiment(config, reward_model_path, base_model_name, max_prompts, output_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
     _, _, evaluation = load_preference_pairs(config)
     if max_prompts is not None:
         evaluation = evaluation.select(range(min(max_prompts, len(evaluation))))
@@ -62,7 +63,10 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
     base_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if base_tokenizer.pad_token is None:
         base_tokenizer.pad_token = base_tokenizer.eos_token
-    base_model = AutoModelForCausalLM.from_pretrained(base_model_name).to(device)
+    base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
+    base_model.to(device)
+    if len(gpu_ids) > 1:
+        base_model = torch.nn.DataParallel(base_model, device_ids=gpu_ids)
     base_model.eval()
 
     reward_tokenizer = AutoTokenizer.from_pretrained(reward_model_path)
@@ -70,7 +74,10 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
         reward_tokenizer.pad_token = reward_tokenizer.eos_token
     reward_model = AutoModelForSequenceClassification.from_pretrained(
         reward_model_path
-    ).to(device)
+    )
+    reward_model.to(device)
+    if len(gpu_ids) > 1:
+        reward_model = torch.nn.DataParallel(reward_model, device_ids=gpu_ids)
     reward_model.eval()
 
     results = []
