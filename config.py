@@ -2,7 +2,7 @@ CONFIG = {
     "dataset_name": "Anthropic/hh-rlhf",
     "dataset_config": None,
     "base_model_name": "Qwen/Qwen2.5-1.5B-Instruct",
-    "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
+    "reward_model_name": "sunnycloudhust/Qwen2.5-3B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
     "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "experiment_output_dir": "outputs/test_time_alignment",
