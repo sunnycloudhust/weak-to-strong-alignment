@@ -58,16 +58,17 @@ The experiment generates candidate responses with a base model, scores them with
 Verified test-time alignment run from `outputs/test_time_alignment/results.json`:
 
 - Base model: `Qwen/Qwen2.5-1.5B-Instruct`
-- Reward model: `sunnycloudhust/reward-model-hh-rlhf`
-- Device: `cuda`
-- Number of prompts: `50`
-- Candidate counts: `1, 2, 4`
+- Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
+- Device: `cuda:0`
+- Number of prompts: `1000`
+- Candidate counts: `1, 2, 4, 8`
 
 | Setting | Mean selected reward | Baseline mean reward |
 |---:|---:|---:|
-| N = 1 | 2.7805 | 3.3282 |
-| N = 2 | 3.3549 | 3.3282 |
-| N = 4 | 3.6848 | 3.3282 |
+| N = 1 | 1.9785 | 2.7313 |
+| N = 2 | 3.0605 | 2.7313 |
+| N = 4 | 3.8488 | 2.7313 |
+| N = 8 | 4.4574 | 2.7313 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 
