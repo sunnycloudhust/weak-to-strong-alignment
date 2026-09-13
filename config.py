@@ -1,7 +1,7 @@
 CONFIG = {
     "dataset_name": "Anthropic/hh-rlhf",
     "dataset_config": None,
-    "base_model_name": "Meta-Llama/Llama-3.2-1B-Instruct",
+    "base_model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
     "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
     "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
