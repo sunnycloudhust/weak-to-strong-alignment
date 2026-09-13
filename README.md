@@ -55,35 +55,18 @@ python experiment.py \
 
 The experiment generates candidate responses with a base model, scores them with the reward model, and selects the highest-scoring response for `N = 1, 2, 4`. The output contains prompts, candidates, scores, baseline responses, and selected responses.
 
-Verified test-time alignment run from `outputs/test_time_alignment/results.json`:
+Verified test-time alignment runs from `outputs/test_time_alignment/results.json` and `outputs/test_time_alignment/results 2.json`:
 
-- Base model: `Qwen/Qwen2.5-1.5B-Instruct`
+- Base models: `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`
 - Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
 - Device: `cuda:0`
 - Number of prompts: `1000`
 - Candidate counts: `1, 2, 4, 8`
 
-| Setting | Mean selected reward | Baseline mean reward |
-|---:|---:|---:|
-| N = 1 | 1.9785 | 2.7313 |
-| N = 2 | 3.0605 | 2.7313 |
-| N = 4 | 3.8488 | 2.7313 |
-| N = 8 | 4.4574 | 2.7313 |
-
-Verified test-time alignment run from `outputs/test_time_alignment/results 2.json`:
-
-- Base model: `Qwen/Qwen2.5-3B-Instruct`
-- Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
-- Device: `cuda:0`
-- Number of prompts: `1000`
-- Candidate counts: `1, 2, 4, 8`
-
-| Setting | Mean selected reward | Baseline mean reward |
-|---:|---:|---:|
-| N = 1 | 1.9026 | 2.1727 |
-| N = 2 | 2.8844 | 2.1727 |
-| N = 4 | 3.6344 | 2.1727 |
-| N = 8 | 4.2196 | 2.1727 |
+| Base model | Baseline mean reward | N = 1 selected reward | N = 2 selected reward | N = 4 selected reward | N = 8 selected reward |
+|---|---:|---:|---:|---:|---:|
+| Qwen/Qwen2.5-1.5B-Instruct | 2.7313 | 1.9785 | 3.0605 | 3.8488 | 4.4574 |
+| Qwen/Qwen2.5-3B-Instruct | 2.1727 | 1.9026 | 2.8844 | 3.6344 | 4.2196 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 
