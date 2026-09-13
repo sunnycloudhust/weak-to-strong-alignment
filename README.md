@@ -65,8 +65,8 @@ Verified test-time alignment runs from `outputs/test_time_alignment/results.json
 
 | Base model | Baseline mean reward | N = 1 selected reward | N = 2 selected reward | N = 4 selected reward | N = 8 selected reward |
 |---|---:|---:|---:|---:|---:|
-| Qwen/Qwen2.5-1.5B-Instruct | 2.7313 | 1.9785 | 3.0605 | 3.8488 | 4.4574 |
-| Qwen/Qwen2.5-3B-Instruct | 2.1727 | 1.9026 | 2.8844 | 3.6344 | 4.2196 |
+| Qwen2.5-1.5B-Instruct | 2.7313 | 1.9785 | 3.0605 | 3.8488 | 4.4574 |
+| Qwen2.5-3B-Instruct | 2.1727 | 1.9026 | 2.8844 | 3.6344 | 4.2196 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 
