@@ -70,6 +70,21 @@ Verified test-time alignment run from `outputs/test_time_alignment/results.json`
 | N = 4 | 3.8488 | 2.7313 |
 | N = 8 | 4.4574 | 2.7313 |
 
+Verified test-time alignment run from `outputs/test_time_alignment/results 2.json`:
+
+- Base model: `Qwen/Qwen2.5-3B-Instruct`
+- Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
+- Device: `cuda:0`
+- Number of prompts: `1000`
+- Candidate counts: `1, 2, 4, 8`
+
+| Setting | Mean selected reward | Baseline mean reward |
+|---:|---:|---:|
+| N = 1 | 1.9026 | 2.1727 |
+| N = 2 | 2.8844 | 2.1727 |
+| N = 4 | 3.6344 | 2.1727 |
+| N = 8 | 4.2196 | 2.1727 |
+
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 
 
