@@ -55,9 +55,9 @@ python experiment.py \
 
 The experiment generates candidate responses with a base model, scores them with the reward model, and selects the highest-scoring response for `N = 1, 2, 4`. The output contains prompts, candidates, scores, baseline responses, and selected responses.
 
-Verified test-time alignment runs from `outputs/test_time_alignment/results.json` and `outputs/test_time_alignment/results 2.json`:
+Verified test-time alignment runs from `outputs/test_time_alignment/results.json`, `outputs/test_time_alignment/results 2.json`, and the latest `outputs/test_time_alignment/results.txt`:
 
-- Base models: `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`
+- Base models: `Qwen/Qwen2.5-1.5B-Instruct`, `Qwen/Qwen2.5-3B-Instruct`, and `TinyLlama/TinyLlama-1.1B-Chat-v1.0`
 - Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
 - Device: `cuda:0`
 - Number of prompts: `1000`
@@ -67,6 +67,7 @@ Verified test-time alignment runs from `outputs/test_time_alignment/results.json
 |---|---:|---:|---:|---:|---:|
 | Qwen2.5-1.5B-Instruct | 2.7313 | 1.9785 | 3.0605 | 3.8488 | 4.4574 |
 | Qwen2.5-3B-Instruct | 2.1727 | 1.9026 | 2.8844 | 3.6344 | 4.2196 |
+| TinyLlama/TinyLlama-1.1B-Chat-v1.0 | 0.9657 | 0.4764 | 1.5255 | 2.3693 | 3.1039 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 
