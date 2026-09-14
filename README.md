@@ -4,16 +4,16 @@ We train Reward Model `Qwen/Qwen2.5-0.5B-Instruct`on dataset `Anthropic/hh-rlhf`
 
 ## Reward Model Results
 
-The current reward-model checkpoint was trained from `Qwen/Qwen2.5-0.5B-Instruct` on `Anthropic/hh-rlhf` using 25,000 training pairs, 16,080 evaluation pairs, and 2 epochs.
+The current reward-model checkpoint was trained from `Qwen/Qwen2.5-0.5B-Instruct` on `Anthropic/hh-rlhf` using 25,000 training pairs, 1,000 evaluation pairs, and 4 epochs. The latest verified metrics stored in `outputs/reward_model_hh_rlhf/metrics.json` are:
 
 | Epoch | Train loss | Train accuracy | Eval loss | Eval accuracy |
 |---:|---:|---:|---:|---:|
-| 1 | 0.6956 | 48.51% | 0.6392 | 51.98% |
-| 2 | 0.5828 | 58.00% | 0.6463 | 52.77% |
+| 3 | 0.5674683642578126 | 59.516% | 0.56841259765625 | 59.900% |
+| 4 | 0.22976679115287027 | 78.348% | 0.812824126496911 | 60.100% |
 
-Accuracy is the fraction of pairs for which the model scores `chosen` higher than `rejected`. The final evaluation accuracy is 52.77%, which is still close to random performance. This checkpoint is therefore experimental and is not intended for production use without further validation.
+Accuracy is the fraction of pairs for which the model scores `chosen` higher than `rejected`. The final evaluation accuracy is 60.10%. This checkpoint remains experimental and is not intended for production use without further validation.
 
-The checkpoint and its Model Card are available on [Hugging Face](https://huggingface.co/sunnycloudhust/reward-model-hh-rlhf). The raw metrics are stored in `outputs/reward_model_hh_rlhf/metrics.json`.
+The checkpoint and its Model Card are available on [Hugging Face](https://huggingface.co/sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model). The raw metrics are stored in `outputs/reward_model_hh_rlhf/metrics.json`.
 
 ## Installation
 
