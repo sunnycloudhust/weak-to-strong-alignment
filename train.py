@@ -2,9 +2,13 @@ import torch
 from loss import pairwise_preference_loss, score
 
 
-def train(model, train_loader, eval_loader, optimizer, device, config):
+def train(model, train_loader, eval_loader, optimizer, device, config, is_tpu=False):
     history = []
     accumulation_steps = config["gradient_accumulation_steps"]
+    log_every_steps = config.get("log_every_steps", 1)
+    xm = None
+    if is_tpu:
+        import torch_xla.core.xla_model as xm
 
     for epoch in range(config["epochs"]):
         model.train()
@@ -20,19 +24,28 @@ def train(model, train_loader, eval_loader, optimizer, device, config):
                 score(model, chosen), score(model, rejected)
             )
             (loss / accumulation_steps).backward()
-            if (step + 1) % accumulation_steps == 0 or step + 1 == len(train_loader):
-                optimizer.step()
+            should_step = (
+                (step + 1) % accumulation_steps == 0 or step + 1 == len(train_loader)
+            )
+            if should_step:
+                if is_tpu:
+                    xm.optimizer_step(optimizer)
+                else:
+                    optimizer.step()
                 optimizer.zero_grad(set_to_none=True)
+                if is_tpu:
+                    xm.mark_step()
 
             pair_count = len(margins)
             train_loss_total += loss.item() * pair_count
             train_correct += (margins > 0).sum().item()
             train_pairs += pair_count
-            print(
-                f"Epoch {epoch + 1}/{config['epochs']} | "
-                f"Train step {step + 1}/{len(train_loader)} | "
-                f"Loss={loss.item():.4f}"
-            )
+            if (step + 1) % log_every_steps == 0 or step + 1 == len(train_loader):
+                print(
+                    f"Epoch {epoch + 1}/{config['epochs']} | "
+                    f"Train step {step + 1}/{len(train_loader)} | "
+                    f"Loss={loss.item():.4f}"
+                )
 
         model.eval()
         eval_loss_total = 0.0
@@ -49,11 +62,14 @@ def train(model, train_loader, eval_loader, optimizer, device, config):
                 eval_loss_total += loss.item() * pair_count
                 eval_correct += (margins > 0).sum().item()
                 eval_pairs += pair_count
-                print(
-                    f"Epoch {epoch + 1}/{config['epochs']} | "
-                    f"Eval step {step + 1}/{len(eval_loader)} | "
-                    f"loss={loss.item():.4f}"
-                )
+                if is_tpu:
+                    xm.mark_step()
+                if (step + 1) % log_every_steps == 0 or step + 1 == len(eval_loader):
+                    print(
+                        f"Epoch {epoch + 1}/{config['epochs']} | "
+                        f"Eval step {step + 1}/{len(eval_loader)} | "
+                        f"loss={loss.item():.4f}"
+                    )
 
         train_metrics = {
             "loss": train_loss_total / train_pairs,

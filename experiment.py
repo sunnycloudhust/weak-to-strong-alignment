@@ -9,6 +9,7 @@ from transformers import AutoTokenizer
 
 from config import CONFIG
 from data import load_preference_pairs
+from main import select_device
 
 
 def extract_prompt(conversation):
@@ -153,8 +154,12 @@ def run_experiment(
     max_prompts,
     output_path,
 ):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
+    device, is_tpu = select_device(config)
+    gpu_ids = (
+        list(range(min(torch.cuda.device_count(), 2)))
+        if device.type == "cuda"
+        else []
+    )
     _, _, evaluation = load_preference_pairs(config)
     if max_prompts is not None:
         evaluation = evaluation.select(range(min(max_prompts, len(evaluation))))
@@ -188,7 +193,7 @@ def run_experiment(
 
     summary = {
         "reward_model": str(reward_model_path),
-        "device": str(device),
+        "device": "tpu" if is_tpu else str(device),
         "experiments": experiments,
     }
     if len(experiments) == 1:

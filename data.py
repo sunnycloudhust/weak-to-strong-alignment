@@ -76,8 +76,21 @@ class PairCollator:
         return collate_pairs(batch, self.tokenizer)
 
 
-def make_loaders(train, evaluation, tokenizer, batch_size):
+def make_loaders(
+    train,
+    evaluation,
+    tokenizer,
+    batch_size,
+    num_workers=0,
+    pin_memory=False,
+):
     collate = PairCollator(tokenizer)
-    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True, collate_fn=collate)
-    eval_loader = DataLoader(evaluation, batch_size=batch_size, shuffle=False, collate_fn=collate)
+    loader_kwargs = {
+        "batch_size": batch_size,
+        "collate_fn": collate,
+        "num_workers": num_workers,
+        "pin_memory": pin_memory,
+    }
+    train_loader = DataLoader(train, shuffle=True, **loader_kwargs)
+    eval_loader = DataLoader(evaluation, shuffle=False, **loader_kwargs)
     return train_loader, eval_loader

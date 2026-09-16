@@ -28,7 +28,12 @@ CONFIG = {
     "output_dir": "outputs/reward_model_hh_rlhf",
     "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "experiment_output_dir": "outputs/test_time_alignment",
+    # Set to "tpu" to use torch-xla, or keep "auto" to prefer TPU when
+    # torch-xla is installed and a TPU runtime is available.
+    "device": "auto",
     "gpu_ids": [0, 1],
+    "dataloader_num_workers": 0,
+    "log_every_steps": 25,
     "max_length": 256,
     "epochs": 2,
     "learning_rate": 2e-5,

@@ -19,7 +19,8 @@ The checkpoint and its Model Card are available on [Hugging Face](https://huggin
 
 ## Installation
 
-Python 3.10+ and a CUDA-capable GPU are recommended for full training.
+Python 3.10+ and a CUDA-capable GPU are recommended for full training. TPU
+runtimes are also supported through `torch-xla`.
 
 ```bash
 python -m venv .venv
@@ -27,6 +28,18 @@ source .venv/bin/activate
 python -m pip install -U pip
 pip install -r requirements.txt
 ```
+
+### TPU runtime
+
+Install the `torch-xla` release matching the PyTorch version and TPU runtime
+from the [official torch-xla installation instructions](https://github.com/pytorch/xla).
+The package is intentionally not pinned in `requirements.txt`, because its
+wheel depends on the platform (TPU VM, Colab, or another XLA runtime).
+
+Set `"device": "tpu"` in `config.py` to require TPU execution. The default
+`"auto"` setting uses TPU when a TPU runtime is detected, then falls back to
+CUDA or CPU. TPU training uses XLA optimizer steps and avoids CUDA-only
+`DataParallel`; the current script runs on one XLA device.
 
 ## Train the Reward Model
 
@@ -36,7 +49,7 @@ The reward model uses pairwise preference loss:
 
 The `Anthropic/hh-rlhf` dataset already provides `chosen` and `rejected` columns, so no additional normalization is required.
 
-All training settings are defined in `config.py`. The default configuration uses a maximum sequence length of 256, batch size 2, gradient accumulation, and two GPUs through `DataParallel`.
+All training settings are defined in `config.py`. The default configuration uses a maximum sequence length of 256, batch size 2, gradient accumulation, and two GPUs through `DataParallel` when CUDA is selected. On TPU, use a batch size and sequence length that fit the available TPU memory.
 
 ```bash
 python main.py
@@ -84,4 +97,3 @@ Verified test-time alignment runs from `outputs/test_time_alignment/results.json
 | TinyLlama-1.1B-Chat-v1.0 | 0.9657 | 0.4764 | 1.5255 | 2.3693 | 3.1039 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
-

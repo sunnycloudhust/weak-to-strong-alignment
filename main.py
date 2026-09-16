@@ -9,6 +9,35 @@ from data import load_preference_pairs, make_loaders, tokenize_pairs
 from train import train
 
 
+def select_device(config):
+    requested = config.get("device", "auto").lower()
+    if requested not in {"auto", "cpu", "cuda", "tpu"}:
+        raise ValueError("config['device'] must be one of: auto, cpu, cuda, tpu")
+
+    xla_available = False
+    if requested in {"auto", "tpu"}:
+        try:
+            import torch_xla.core.xla_model as xm
+
+            xla_available = xm.xla_device_hw() == "TPU"
+        except (ImportError, RuntimeError):
+            if requested == "tpu":
+                raise RuntimeError(
+                    "TPU requested but torch-xla is unavailable or no TPU runtime "
+                    "was detected. Install the torch-xla version matching PyTorch."
+                )
+
+    if xla_available:
+        import torch_xla.core.xla_model as xm
+
+        return xm.xla_device(), True
+    if requested == "tpu":
+        raise RuntimeError("TPU requested but no TPU runtime was detected.")
+    if requested == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA requested but no CUDA device is available.")
+    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu"), False
+
+
 def main():
     config = CONFIG
     output_dir = Path(config["output_dir"])
@@ -22,19 +51,24 @@ def main():
     train_dataset = tokenize_pairs(train_dataset, tokenizer, config["max_length"])
     eval_dataset = tokenize_pairs(eval_dataset, tokenizer, config["max_length"])
     train_loader, eval_loader = make_loaders(
-        train_dataset, eval_dataset, tokenizer, config["batch_size"]
+        train_dataset,
+        eval_dataset,
+        tokenizer,
+        config["batch_size"],
+        num_workers=config.get("dataloader_num_workers", 0),
+        pin_memory=False,
     )
-    
-    # Optimized for 2 GPUs
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    device, is_tpu = select_device(config)
     gpu_ids = config["gpu_ids"] if device.type == "cuda" else []
     if gpu_ids and max(gpu_ids) >= torch.cuda.device_count():
         raise ValueError(
             f"Requested GPU ids {gpu_ids}, but only {torch.cuda.device_count()} "
             "CUDA device(s) are available."
         )
+    device_name = "tpu" if is_tpu else (gpu_ids or device.type)
     print(
-        f"Using device={device}, gpu_ids={gpu_ids or 'cpu'}, "
+        f"Using device={device}, accelerator={device_name}, "
         f"train_pairs={len(train_dataset)}, "
         f"eval_pairs={len(eval_dataset)}"
     )
@@ -53,15 +87,25 @@ def main():
         weight_decay=config["weight_decay"],
     )
 
-    history = train(model, train_loader, eval_loader, optimizer, device, config)
+    history = train(
+        model,
+        train_loader,
+        eval_loader,
+        optimizer,
+        device,
+        config,
+        is_tpu=is_tpu,
+    )
 
     model_to_save = model.module if isinstance(model, torch.nn.DataParallel) else model
+    if is_tpu:
+        model_to_save = model_to_save.cpu()
     model_to_save.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
     summary = {
         "dataset": config["dataset_name"],
         "model": config["reward_model_name"],
-        "device": str(device),
+        "device": "tpu" if is_tpu else str(device),
         "train_pairs": len(train_dataset),
         "eval_pairs": len(eval_dataset),
         "history": history,
