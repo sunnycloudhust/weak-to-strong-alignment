@@ -3,9 +3,26 @@ CONFIG = {
     "dataset_config": None,
     "base_model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
     "base_model_names": [
+        # Qwen
+        "Qwen/Qwen2.5-0.5B-Instruct",
         "Qwen/Qwen2.5-1.5B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+        # TinyLlama
         "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        # SmolLM2
+        "HuggingFaceTB/SmolLM2-135M-Instruct",
+        "HuggingFaceTB/SmolLM2-360M-Instruct",
+        "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+        # Phi
+        "microsoft/Phi-3.5-mini-instruct",
+        # Mistral
+        "mistralai/Mistral-7B-Instruct-v0.3",
+        # Gemma
+        "google/gemma-2-2b-it",
+        "google/gemma-2-9b-it",
+        # Falcon
+        "tiiuae/Falcon3-7B-Instruct",
     ],
     "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
