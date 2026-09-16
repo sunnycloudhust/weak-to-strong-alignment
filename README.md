@@ -55,6 +55,18 @@ python experiment.py \
   --output outputs/test_time_alignment/results.json
 ```
 
+By default, `experiment.py` runs all models listed in `base_model_names` in
+`config.py` sequentially and writes one combined JSON file. To override the
+configured models for a run, pass one or more model IDs after `--base-model`:
+
+```bash
+python experiment.py \
+  --reward-model outputs/reward_model_hh_rlhf \
+  --base-model Qwen/Qwen2.5-1.5B-Instruct Qwen/Qwen2.5-3B-Instruct \
+  --max-prompts 100 \
+  --output outputs/test_time_alignment/qwen-results.json
+```
+
 The experiment generates candidate responses with a base model, scores them with the reward model, and selects the highest-scoring response for `N = 1, 2, 4`. The output contains prompts, candidates, scores, baseline responses, and selected responses.
 
 Verified test-time alignment runs from `outputs/test_time_alignment/results.json`, `outputs/test_time_alignment/results 2.json`, and the latest `outputs/test_time_alignment/results.txt`:
@@ -72,5 +84,4 @@ Verified test-time alignment runs from `outputs/test_time_alignment/results.json
 | TinyLlama-1.1B-Chat-v1.0 | 0.9657 | 0.4764 | 1.5255 | 2.3693 | 3.1039 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
-
 

@@ -2,6 +2,11 @@ CONFIG = {
     "dataset_name": "Anthropic/hh-rlhf",
     "dataset_config": None,
     "base_model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "base_model_names": [
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    ],
     "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
     "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
