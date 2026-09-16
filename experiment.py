@@ -1,5 +1,7 @@
+import argparse
 import json
 from pathlib import Path
+from collections.abc import Sequence
 
 import torch
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification
@@ -53,30 +55,20 @@ def generate_candidates(model, tokenizer, prompt, count, config, device):
     )
 
 
-def run_experiment(config, reward_model_path, base_model_name, max_prompts, output_path):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
-    _, _, evaluation = load_preference_pairs(config)
-    if max_prompts is not None:
-        evaluation = evaluation.select(range(min(max_prompts, len(evaluation))))
-
+def evaluate_base_model(
+    config,
+    evaluation,
+    reward_model,
+    reward_tokenizer,
+    base_model_name,
+    device,
+):
     base_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
     if base_tokenizer.pad_token is None:
         base_tokenizer.pad_token = base_tokenizer.eos_token
     base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
     base_model.to(device)
     base_model.eval()
-
-    reward_tokenizer = AutoTokenizer.from_pretrained(reward_model_path)
-    if reward_tokenizer.pad_token is None:
-        reward_tokenizer.pad_token = reward_tokenizer.eos_token
-    reward_model = AutoModelForSequenceClassification.from_pretrained(
-        reward_model_path
-    )
-    reward_model.to(device)
-    if len(gpu_ids) > 1:
-        reward_model = torch.nn.DataParallel(reward_model, device_ids=gpu_ids)
-    reward_model.eval()
 
     results = []
     for index, example in enumerate(evaluation):
@@ -122,7 +114,9 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
                 "by_num_candidates": candidate_data,
             }
         )
-        print(f"Processed {index + 1}/{len(evaluation)} prompts")
+        print(
+            f"{base_model_name}: processed {index + 1}/{len(evaluation)} prompts"
+        )
 
     aggregate = {
         "baseline_reward_mean": sum(
@@ -136,29 +130,94 @@ def run_experiment(config, reward_model_path, base_model_name, max_prompts, outp
             for result in results
         ]
         aggregate["by_num_candidates"][str(count)] = {
-            "selected_reward_mean": sum(selected_rewards) / max(len(selected_rewards), 1),
+            "selected_reward_mean": sum(selected_rewards)
+            / max(len(selected_rewards), 1),
         }
 
-    summary = {
+    del base_model
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return {
         "base_model": base_model_name,
-        "reward_model": str(reward_model_path),
-        "device": str(device),
         "num_prompts": len(results),
         "num_candidates": config["num_candidates"],
         "aggregate": aggregate,
         "results": results,
     }
+
+
+def run_experiment(
+    config,
+    reward_model_path,
+    base_model_names,
+    max_prompts,
+    output_path,
+):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
+    _, _, evaluation = load_preference_pairs(config)
+    if max_prompts is not None:
+        evaluation = evaluation.select(range(min(max_prompts, len(evaluation))))
+
+    reward_tokenizer = AutoTokenizer.from_pretrained(reward_model_path)
+    if reward_tokenizer.pad_token is None:
+        reward_tokenizer.pad_token = reward_tokenizer.eos_token
+    reward_model = AutoModelForSequenceClassification.from_pretrained(
+        reward_model_path
+    )
+    reward_model.to(device)
+    if len(gpu_ids) > 1:
+        reward_model = torch.nn.DataParallel(reward_model, device_ids=gpu_ids)
+    reward_model.eval()
+
+    if isinstance(base_model_names, str):
+        base_model_names = [base_model_names]
+    if not isinstance(base_model_names, Sequence) or not base_model_names:
+        raise ValueError("base_model_names must contain at least one model name")
+    experiments = {
+        model_name: evaluate_base_model(
+            config,
+            evaluation,
+            reward_model,
+            reward_tokenizer,
+            model_name,
+            device,
+        )
+        for model_name in base_model_names
+    }
+
+    summary = {
+        "reward_model": str(reward_model_path),
+        "device": str(device),
+        "experiments": experiments,
+    }
+    if len(experiments) == 1:
+        summary.update(next(iter(experiments.values())))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(summary, indent=2) + "\n")
     print(f"Experiment results saved to {output_path}")
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run best-of-N test-time alignment.")
+    parser.add_argument("--reward-model", default=None)
+    parser.add_argument("--base-model", nargs="+", default=None)
+    parser.add_argument("--max-prompts", type=int, default=None)
+    parser.add_argument("--output", type=Path, default=None)
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = parse_args()
     reward_model_ref = CONFIG.get("reward_model_hf_repo", CONFIG["output_dir"])
+    base_model_names = args.base_model or CONFIG.get(
+        "base_model_names", [CONFIG["base_model_name"]]
+    )
     run_experiment(
         CONFIG,
-        reward_model_ref,
-        CONFIG["base_model_name"],
-        CONFIG["max_test_samples"],
-        Path(CONFIG["experiment_output_dir"]) / "results.json",
+        args.reward_model or reward_model_ref,
+        base_model_names,
+        args.max_prompts if args.max_prompts is not None else CONFIG["max_test_samples"],
+        args.output
+        or Path(CONFIG["experiment_output_dir"]) / "results.json",
     )
