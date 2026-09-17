@@ -2,3 +2,4 @@ datasets>=2.18
 numpy>=1.24
 torch>=2.1
 transformers>=4.40
+tqdm>=4.66
