@@ -30,7 +30,6 @@ CONFIG = {
     "experiment_output_dir": "outputs/test_time_alignment",
     # Leave empty to use the first available GPU; set [0, 1] for multi-GPU.
     "gpu_ids": [],
-    "log_every_steps": 10,
     "max_length": 256,
     "epochs": 2,
     "learning_rate": 2e-5,

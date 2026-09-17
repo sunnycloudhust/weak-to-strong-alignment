@@ -6,7 +6,6 @@ from loss import pairwise_preference_loss, score
 def train(model, train_loader, eval_loader, optimizer, device, config):
     history = []
     accumulation_steps = config["gradient_accumulation_steps"]
-    log_every_steps = config["log_every_steps"]
 
     for epoch in range(config["epochs"]):
         model.train()
@@ -35,12 +34,6 @@ def train(model, train_loader, eval_loader, optimizer, device, config):
             train_loss_total += loss.item() * pair_count
             train_correct += (margins > 0).sum().item()
             train_pairs += pair_count
-            if (step + 1) % log_every_steps == 0 or step + 1 == len(train_loader):
-                tqdm.write(
-                    f"Epoch {epoch + 1}/{config['epochs']} | "
-                    f"Train step {step + 1}/{len(train_loader)} | "
-                    f"Loss={loss.item():.4f}"
-                )
 
         model.eval()
         eval_loss_total = 0.0
@@ -62,12 +55,7 @@ def train(model, train_loader, eval_loader, optimizer, device, config):
                 eval_loss_total += loss.item() * pair_count
                 eval_correct += (margins > 0).sum().item()
                 eval_pairs += pair_count
-                if (step + 1) % log_every_steps == 0 or step + 1 == len(eval_loader):
-                    tqdm.write(
-                        f"Epoch {epoch + 1}/{config['epochs']} | "
-                        f"Eval step {step + 1}/{len(eval_loader)} | "
-                        f"loss={loss.item():.4f}"
-                    )
+
 
         train_metrics = {
             "loss": train_loss_total / train_pairs,
