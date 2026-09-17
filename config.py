@@ -38,7 +38,7 @@ CONFIG = {
     "gradient_accumulation_steps": 8,
     "eval_ratio": 0.10,
     "test_ratio": 0.10,
-    "max_train_samples": 25000,
+    "max_train_samples": 20000,
     "max_eval_samples": 100,
     "max_test_samples": 100,
     "num_candidates": [1, 2, 4, 8],
