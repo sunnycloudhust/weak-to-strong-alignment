@@ -25,7 +25,6 @@ def main():
         train_dataset, eval_dataset, tokenizer, config["batch_size"]
     )
     
-    # Optimized for 2 GPUs
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     gpu_ids = config["gpu_ids"] if device.type == "cuda" else []
     if gpu_ids and max(gpu_ids) >= torch.cuda.device_count():
@@ -33,8 +32,9 @@ def main():
             f"Requested GPU ids {gpu_ids}, but only {torch.cuda.device_count()} "
             "CUDA device(s) are available."
         )
+    display_gpu_ids = gpu_ids or [device.index] if device.type == "cuda" else "cpu"
     print(
-        f"Using device={device}, gpu_ids={gpu_ids or 'cpu'}, "
+        f"Using device={device}, gpu_ids={display_gpu_ids}, "
         f"train_pairs={len(train_dataset)}, "
         f"eval_pairs={len(eval_dataset)}"
     )

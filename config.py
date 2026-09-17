@@ -28,7 +28,8 @@ CONFIG = {
     "output_dir": "outputs/reward_model_hh_rlhf",
     "reward_model_hf_repo": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "experiment_output_dir": "outputs/test_time_alignment",
-    "gpu_ids": [0, 1],
+    # Leave empty to use the first available GPU; set [0, 1] for multi-GPU.
+    "gpu_ids": [],
     "max_length": 256,
     "epochs": 2,
     "learning_rate": 2e-5,
