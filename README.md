@@ -42,7 +42,6 @@ All training settings are defined in `config.py`. The default configuration uses
 python main.py
 ```
 
-The script saves the model, tokenizer, and aggregate metrics to `outputs/reward_model_hh_rlhf/`. For a smaller smoke run, set `max_train_samples`, `max_eval_samples`, and `max_test_samples` in `config.py` before starting training.
 
 ## Best-of-N Test-Time Alignment
 

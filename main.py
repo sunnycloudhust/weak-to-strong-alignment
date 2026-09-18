@@ -53,7 +53,17 @@ def main():
         weight_decay=config["weight_decay"],
     )
 
-    history = train(model, train_loader, eval_loader, optimizer, device, config)
+    checkpoint_dir = output_dir / "checkpoints"
+    history = train(
+        model,
+        train_loader,
+        eval_loader,
+        optimizer,
+        device,
+        config,
+        tokenizer,
+        checkpoint_dir,
+    )
 
     model_to_save = model.module if isinstance(model, torch.nn.DataParallel) else model
     model_to_save.save_pretrained(output_dir)

@@ -1,11 +1,14 @@
+from pathlib import Path
+
 import torch
 from tqdm.auto import tqdm
 from loss import pairwise_preference_loss, score
 
 
-def train(model, train_loader, eval_loader, optimizer, device, config):
+def train(model, train_loader, eval_loader, optimizer, device, config, tokenizer, checkpoint_dir):
     history = []
     accumulation_steps = config["gradient_accumulation_steps"]
+    checkpoint_dir = Path(checkpoint_dir)
 
     for epoch in range(config["epochs"]):
         model.train()
@@ -74,5 +77,14 @@ def train(model, train_loader, eval_loader, optimizer, device, config):
             f"eval_loss={eval_metrics['loss']:.4f} | "
             f"eval_accuracy={eval_metrics['accuracy']:.4f}"
         )
+
+        epoch_checkpoint_dir = checkpoint_dir / f"epoch_{epoch + 1}"
+        epoch_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        model_to_save = (
+            model.module if isinstance(model, torch.nn.DataParallel) else model
+        )
+        model_to_save.save_pretrained(epoch_checkpoint_dir)
+        tokenizer.save_pretrained(epoch_checkpoint_dir)
+        print(f"Checkpoint saved to {epoch_checkpoint_dir}")
 
     return history
