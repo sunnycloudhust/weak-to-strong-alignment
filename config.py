@@ -31,8 +31,8 @@ CONFIG = {
     # Leave empty to use the first available GPU; set [0, 1] for multi-GPU.
     "gpu_ids": [],
     "max_length": 256,
-    "epochs": 2,
-    "learning_rate": 2e-5,
+    "epochs": 1,
+    "learning_rate": 2e-3,
     "weight_decay": 0.01,
     "batch_size": 8,
     "gradient_accumulation_steps": 2,
