@@ -30,7 +30,7 @@ CONFIG = {
     "experiment_output_dir": "outputs/test_time_alignment",
     "gpu_ids": [],
     "max_length": 256,
-    "epochs": 2,
+    "epochs": 5,
     "learning_rate": 2e-4,
     "weight_decay": 0.01,
     "batch_size": 8,
