@@ -71,7 +71,7 @@ def load_base_model(model_name, device, quantized=True):
                     bnb_4bit_quant_type="nf4",
                     bnb_4bit_compute_dtype=torch.float16,
                 ),
-                "device_map": {"": device.index or 0},
+                "device_map": "auto",
             }
         )
     model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
