@@ -68,6 +68,18 @@ python experiment.py \
 
 The experiment generates candidate responses with a base model, scores them with the reward model, and selects the highest-scoring response for `N = 1, 2, 4`. The output contains prompts, candidates, scores, baseline responses, and selected responses.
 
+All base models are loaded in 4-bit NF4 quantization on CUDA by default:
+
+```bash
+python experiment.py \
+  --reward-model outputs/reward_model_hh_rlhf \
+  --base-model Qwen/Qwen2.5-7B-Instruct \
+  --max-prompts 100 \
+  --output outputs/test_time_alignment/qwen-7b-4bit.json
+```
+
+Quantized base-model loading is CUDA-only and requires `accelerate` and `bitsandbytes`. It changes base-model loading only; the reward model remains in its normal precision. Use `--no-quantized` to disable it when running a non-CUDA test.
+
 Verified test-time alignment runs from `outputs/test_time_alignment/results.json`, `outputs/test_time_alignment/results 2.json`, and the latest `outputs/test_time_alignment/results.txt`:
 
 - Base models: `Qwen/Qwen2.5-1.5B-Instruct`, `Qwen/Qwen2.5-3B-Instruct`, and `TinyLlama/TinyLlama-1.1B-Chat-v1.0`

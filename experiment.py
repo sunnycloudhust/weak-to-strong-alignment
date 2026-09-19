@@ -5,7 +5,7 @@ from collections.abc import Sequence
 
 import torch
 from transformers import AutoModelForCausalLM, AutoModelForSequenceClassification
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, BitsAndBytesConfig
 
 from config import CONFIG
 from data import load_preference_pairs
@@ -55,6 +55,32 @@ def generate_candidates(model, tokenizer, prompt, count, config, device):
     )
 
 
+def load_base_model(model_name, device, quantized=True):
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model_kwargs = {}
+    if quantized:
+        if device.type != "cuda":
+            raise ValueError("Quantized base models require a CUDA device")
+        model_kwargs.update(
+            {
+                "quantization_config": BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_compute_dtype=torch.float16,
+                ),
+                "device_map": {"": device.index or 0},
+            }
+        )
+    model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
+    if not quantized:
+        model.to(device)
+    model.eval()
+    return model, tokenizer
+
+
 def evaluate_base_model(
     config,
     evaluation,
@@ -62,13 +88,11 @@ def evaluate_base_model(
     reward_tokenizer,
     base_model_name,
     device,
+    quantized=True,
 ):
-    base_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-    if base_tokenizer.pad_token is None:
-        base_tokenizer.pad_token = base_tokenizer.eos_token
-    base_model = AutoModelForCausalLM.from_pretrained(base_model_name)
-    base_model.to(device)
-    base_model.eval()
+    base_model, base_tokenizer = load_base_model(
+        base_model_name, device, quantized
+    )
 
     results = []
     for index, example in enumerate(evaluation):
@@ -152,6 +176,7 @@ def run_experiment(
     base_model_names,
     max_prompts,
     output_path,
+    quantized=True,
 ):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
@@ -174,17 +199,33 @@ def run_experiment(
         base_model_names = [base_model_names]
     if not isinstance(base_model_names, Sequence) or not base_model_names:
         raise ValueError("base_model_names must contain at least one model name")
-    experiments = {
-        model_name: evaluate_base_model(
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    per_model_dir = output_path.parent / "per_model"
+    per_model_dir.mkdir(parents=True, exist_ok=True)
+    experiments = {}
+    for model_name in base_model_names:
+        experiment = evaluate_base_model(
             config,
             evaluation,
             reward_model,
             reward_tokenizer,
             model_name,
             device,
+            quantized,
         )
-        for model_name in base_model_names
-    }
+        experiments[model_name] = experiment
+        safe_model_name = model_name.replace("/", "__")
+        per_model_path = per_model_dir / f"{safe_model_name}.json"
+        per_model_summary = {
+            "reward_model": str(reward_model_path),
+            "device": str(device),
+            "quantized": quantized,
+            "experiment": experiment,
+        }
+        per_model_path.write_text(
+            json.dumps(per_model_summary, indent=2) + "\n"
+        )
+        print(f"Base-model result saved to {per_model_path}")
 
     summary = {
         "reward_model": str(reward_model_path),
@@ -193,7 +234,6 @@ def run_experiment(
     }
     if len(experiments) == 1:
         summary.update(next(iter(experiments.values())))
-    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(summary, indent=2) + "\n")
     print(f"Experiment results saved to {output_path}")
 
@@ -204,6 +244,11 @@ def parse_args():
     parser.add_argument("--base-model", nargs="+", default=None)
     parser.add_argument("--max-prompts", type=int, default=None)
     parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument(
+        "--no-quantized",
+        action="store_true",
+        help="Disable the default 4-bit NF4 base-model loading (CUDA only).",
+    )
     return parser.parse_args()
 
 
@@ -220,4 +265,5 @@ if __name__ == "__main__":
         args.max_prompts if args.max_prompts is not None else CONFIG["max_test_samples"],
         args.output
         or Path(CONFIG["experiment_output_dir"]) / "results.json",
+        not args.no_quantized,
     )

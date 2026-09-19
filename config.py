@@ -1,7 +1,6 @@
 CONFIG = {
     "dataset_name": "Anthropic/hh-rlhf",
     "dataset_config": None,
-    "base_model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
     "base_model_names": [
         # Qwen
         "Qwen/Qwen2.5-0.5B-Instruct",
