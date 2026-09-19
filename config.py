@@ -38,7 +38,7 @@ CONFIG = {
     "test_ratio": 0.10,
     "max_train_samples": 10000,
     "max_eval_samples": 100,
-    "max_test_samples": 100,
+    "max_test_samples": 50,
     "num_candidates": [1, 2, 4, 8],
     "generation_max_new_tokens": 128,
     "generation_temperature": 0.8,
