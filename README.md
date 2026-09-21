@@ -86,7 +86,7 @@ Verified test-time alignment results:
 
 | Base model | Baseline mean reward | N = 1 selected reward | N = 2 selected reward | N = 4 selected reward | N = 8 selected reward |
 |---|---:|---:|---:|---:|---:|
-| Qwen2.5-0.5B-Instruct | 0.1448 | -1.0837 | 1.2118 | 2.3467 | 3.3858 |
+| Qwen2.5-0.5B-Instruct | 0.1448 | 1.0837 | 1.2118 | 2.3467 | 3.3858 |
 | Qwen2.5-1.5B-Instruct | 1.8874 | 0.2070 | 1.5848 | 2.4772 | 3.3069 |
 | Qwen2.5-3B-Instruct | 2.0674 | 1.7284 | 2.6216 | 3.5232 | 4.3100 |
 | Qwen2.5-7B-Instruct | 1.5498 | 1.5615 | 2.7051 | 3.4168 | 4.2600 |
