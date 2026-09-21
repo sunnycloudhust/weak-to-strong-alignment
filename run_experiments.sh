@@ -3,8 +3,9 @@ set -euo pipefail
 
 REWARD_MODEL="outputs/reward_model_hh_rlhf"
 OUTPUT="outputs/test_time_alignment/results.json"
+PYTHON="${PYTHON:-python}"
 
-conda run -n research python - "$REWARD_MODEL" "$OUTPUT" <<'PY'
+"$PYTHON" - "$REWARD_MODEL" "$OUTPUT" <<'PY'
 import sys
 from pathlib import Path
 
