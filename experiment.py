@@ -1,4 +1,3 @@
-import argparse
 import json
 from pathlib import Path
 from collections.abc import Sequence
@@ -247,32 +246,3 @@ def run_experiment(
     print(f"Experiment results saved to {output_path}")
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Run best-of-N test-time alignment.")
-    parser.add_argument("--reward-model", default=None)
-    parser.add_argument("--base-model", nargs="+", default=None)
-    parser.add_argument("--max-prompts", type=int, default=None)
-    parser.add_argument("--output", type=Path, default=None)
-    parser.add_argument(
-        "--no-quantized",
-        action="store_true",
-        help="Disable the default 4-bit NF4 base-model loading (CUDA only).",
-    )
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    reward_model_ref = CONFIG.get("reward_model_hf_repo", CONFIG["output_dir"])
-    base_model_names = args.base_model or CONFIG.get(
-        "base_model_names", [CONFIG["base_model_name"]]
-    )
-    run_experiment(
-        CONFIG,
-        args.reward_model or reward_model_ref,
-        base_model_names,
-        args.max_prompts if args.max_prompts is not None else CONFIG["max_test_samples"],
-        args.output
-        or Path(CONFIG["experiment_output_dir"]) / "results.json",
-        not args.no_quantized,
-    )
