@@ -24,7 +24,7 @@ def main():
     train_loader, eval_loader = make_loaders(
         train_dataset, eval_dataset, tokenizer, config["batch_size"]
     )
-    
+    ### device checking ###
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     gpu_ids = config["gpu_ids"] if device.type == "cuda" else []
     if gpu_ids and max(gpu_ids) >= torch.cuda.device_count():
@@ -38,7 +38,7 @@ def main():
         f"train_pairs={len(train_dataset)}, "
         f"eval_pairs={len(eval_dataset)}"
     )
-    
+    #######
     
     model = AutoModelForSequenceClassification.from_pretrained(
         config["reward_model_name"], num_labels=1
