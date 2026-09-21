@@ -1,9 +1,16 @@
 #!/bin/zsh
 set -euo pipefail
 
-REWARD_MODEL="outputs/reward_model_hh_rlhf"
-OUTPUT="outputs/test_time_alignment/results.json"
+SCRIPT_DIR="${0:A:h}"
+REWARD_MODEL="${REWARD_MODEL:-$SCRIPT_DIR/outputs/reward_model_hh_rlhf}"
+OUTPUT="${OUTPUT:-$SCRIPT_DIR/outputs/test_time_alignment/results.json}"
 PYTHON="${PYTHON:-python}"
+
+if [[ ! -f "$REWARD_MODEL/config.json" ]]; then
+    print -u2 "Reward model checkpoint not found: $REWARD_MODEL"
+    print -u2 "Copy or download the checkpoint into outputs/reward_model_hh_rlhf before running."
+    exit 1
+fi
 
 "$PYTHON" - "$REWARD_MODEL" "$OUTPUT" <<'PY'
 import sys
