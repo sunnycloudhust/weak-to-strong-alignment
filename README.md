@@ -45,44 +45,40 @@ python main.py
 
 ## Best-of-N Test-Time Alignment
 
-After training a reward model, run:
+The experiment does not train a reward model. It uses the reward model repository
+from `config.py` to score responses, and Transformers downloads it automatically
+from Hugging Face on the first run. No manual clone is required.
+
+Run all base models listed in `config.py` with:
 
 ```bash
-python experiment.py \
-  --reward-model outputs/reward_model_hh_rlhf \
-  --max-prompts 100 \
-  --output outputs/test_time_alignment/results.json
+./run_experiments.sh
 ```
 
-By default, `experiment.py` runs all models listed in `base_model_names` in
-`config.py` sequentially and writes one combined JSON file. To override the
-configured models for a run, pass one or more model IDs after `--base-model`:
+The number of prompts is controlled by `max_test_samples` in `config.py`, and
+the base model list is controlled by `base_model_names` in the same file.
+Results are written to `outputs/test_time_alignment/results.json`.
 
 ```bash
-python experiment.py \
-  --reward-model outputs/reward_model_hh_rlhf \
-  --base-model Qwen/Qwen2.5-1.5B-Instruct Qwen/Qwen2.5-3B-Instruct \
-  --max-prompts 100 \
-  --output outputs/test_time_alignment/qwen-results.json
+REWARD_MODEL=/path/to/local/reward_model ./run_experiments.sh
 ```
 
-The experiment generates candidate responses with a base model, scores them with the reward model, and selects the highest-scoring response for `N = 1, 2, 4`. The output contains prompts, candidates, scores, baseline responses, and selected responses.
+The optional `REWARD_MODEL` environment variable can point to a local reward
+model checkpoint instead of the Hugging Face repository. The experiment
+generates candidate responses with each base model, scores them with the reward
+model, and selects the highest-scoring response for `N = 1, 2, 4, 8`.
 
 All base models are loaded in 4-bit NF4 quantization on CUDA by default:
 
 ```bash
-python experiment.py \
-  --reward-model outputs/reward_model_hh_rlhf \
-  --base-model Qwen/Qwen2.5-7B-Instruct \
-  --max-prompts 100 \
-  --output outputs/test_time_alignment/qwen-7b-4bit.json
+./run_experiments.sh
 ```
 
 Quantized base-model loading is CUDA-only and requires `accelerate` and `bitsandbytes`. It changes base-model loading only; the reward model remains in its normal precision. Use `--no-quantized` to disable it when running a non-CUDA test.
 
-Verified test-time alignment runs from `outputs/test_time_alignment/results.json`, `outputs/test_time_alignment/results 2.json`, and the latest `outputs/test_time_alignment/results.txt`:
+Verified test-time alignment results:
 
-- Base models: `Qwen/Qwen2.5-1.5B-Instruct`, `Qwen/Qwen2.5-3B-Instruct`, and `TinyLlama/TinyLlama-1.1B-Chat-v1.0`
+- Base models: `Qwen/Qwen2.5-0.5B-Instruct`, `Qwen/Qwen2.5-1.5B-Instruct`, `Qwen/Qwen2.5-3B-Instruct`, and `Qwen/Qwen2.5-7B-Instruct`
 - Reward model: `sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model`
 - Device: `cuda:0`
 - Number of prompts: `1000`
@@ -90,9 +86,10 @@ Verified test-time alignment runs from `outputs/test_time_alignment/results.json
 
 | Base model | Baseline mean reward | N = 1 selected reward | N = 2 selected reward | N = 4 selected reward | N = 8 selected reward |
 |---|---:|---:|---:|---:|---:|
-| Qwen2.5-1.5B-Instruct | 2.7313 | 1.9785 | 3.0605 | 3.8488 | 4.4574 |
-| Qwen2.5-3B-Instruct | 2.1727 | 1.9026 | 2.8844 | 3.6344 | 4.2196 |
-| TinyLlama-1.1B-Chat-v1.0 | 0.9657 | 0.4764 | 1.5255 | 2.3693 | 3.1039 |
+| Qwen2.5-0.5B-Instruct | 0.1448 | -1.0837 | 1.2118 | 2.3467 | 3.3858 |
+| Qwen2.5-1.5B-Instruct | 1.8874 | 0.2070 | 1.5848 | 2.4772 | 3.3069 |
+| Qwen2.5-3B-Instruct | 2.0674 | 1.7284 | 2.6216 | 3.5232 | 4.3100 |
+| Qwen2.5-7B-Instruct | 1.5498 | 1.5615 | 2.7051 | 3.4168 | 4.2600 |
 
 This measures reward-model selection rather than independent response quality. Use human evaluation or a fixed external judge to estimate win rate; the reward model itself should not be treated as ground truth.
 

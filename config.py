@@ -2,26 +2,33 @@ CONFIG = {
     "dataset_name": "Anthropic/hh-rlhf",
     "dataset_config": None,
     "base_model_names": [
-        # Qwen
-        "Qwen/Qwen2.5-0.5B-Instruct",
-        "Qwen/Qwen2.5-1.5B-Instruct",
-        "Qwen/Qwen2.5-3B-Instruct",
-        "Qwen/Qwen2.5-7B-Instruct",
-        # TinyLlama
-        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        # SmolLM2
-        "HuggingFaceTB/SmolLM2-135M-Instruct",
-        "HuggingFaceTB/SmolLM2-360M-Instruct",
-        "HuggingFaceTB/SmolLM2-1.7B-Instruct",
-        # Phi
-        "microsoft/Phi-3.5-mini-instruct",
-        # Mistral
-        "mistralai/Mistral-7B-Instruct-v0.3",
-        # Gemma
-        "google/gemma-2-2b-it",
-        "google/gemma-2-9b-it",
-        # Falcon
-        "tiiuae/Falcon3-7B-Instruct",
+    
+    # Qwen
+    "Qwen/Qwen2.5-0.5B-Instruct",
+    "Qwen/Qwen2.5-1.5B-Instruct",
+    "Qwen/Qwen2.5-3B-Instruct",
+    "Qwen/Qwen2.5-7B-Instruct",
+
+    # Llama
+    "meta-llama/Llama-3.2-1B-Instruct",
+    "meta-llama/Llama-3.2-3B-Instruct",
+    "meta-llama/Llama-3.1-8B-Instruct",
+
+    # Phi
+    "microsoft/Phi-3.5-mini-instruct",
+    "microsoft/Phi-3-mini-4k-instruct",
+
+    # Mistral
+    "mistralai/Mistral-7B-Instruct-v0.3",
+    "mistralai/Mistral-7B-Instruct-v0.2",
+
+    # Gemma
+    "google/gemma-2-2b-it",
+    "google/gemma-2-9b-it",
+
+    # DeepSeek
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
     ],
     "reward_model_name": "sunnycloudhust/Qwen2.5-0.5B-Instruct-Reward-Model",
     "output_dir": "outputs/reward_model_hh_rlhf",
