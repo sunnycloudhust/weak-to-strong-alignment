@@ -226,6 +226,15 @@ def run_experiment(
             json.dumps(per_model_summary, indent=2) + "\n"
         )
         print(f"Base-model result saved to {per_model_path}")
+        aggregate = experiment["aggregate"]
+        selected_rewards = aggregate["by_num_candidates"]
+        print(
+            f"{model_name}: baseline_mean={aggregate['baseline_reward_mean']:.4f}; "
+            + ", ".join(
+                f"N={count} mean={selected_rewards[str(count)]['selected_reward_mean']:.4f}"
+                for count in experiment["num_candidates"]
+            )
+        )
 
     summary = {
         "reward_model": str(reward_model_path),
