@@ -92,12 +92,13 @@ def evaluate_base_model(
     base_model, base_tokenizer = load_base_model(
         base_model_name, device, quantized
     )
+    generation_device = base_model.get_input_embeddings().weight.device
 
     results = []
     for index, example in enumerate(evaluation):
         prompt = extract_prompt(example["chosen"])
         baseline_response = generate_candidates(
-            base_model, base_tokenizer, prompt, 1, config, device
+            base_model, base_tokenizer, prompt, 1, config, generation_device
         )[0]
         baseline_text = prompt + baseline_response
         baseline_reward = score_texts(
@@ -109,7 +110,12 @@ def evaluate_base_model(
         )[0]
         max_candidates = max(config["num_candidates"])
         all_responses = generate_candidates(
-            base_model, base_tokenizer, prompt, max_candidates, config, device
+            base_model,
+            base_tokenizer,
+            prompt,
+            max_candidates,
+            config,
+            generation_device,
         )
         candidate_data = {}
         for count in config["num_candidates"]:
@@ -178,7 +184,6 @@ def run_experiment(
     quantized=True,
 ):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    gpu_ids = list(range(min(torch.cuda.device_count(), 2))) if torch.cuda.is_available() else []
     _, _, evaluation = load_preference_pairs(config)
     if max_prompts is not None:
         evaluation = evaluation.select(range(min(max_prompts, len(evaluation))))
@@ -190,8 +195,6 @@ def run_experiment(
         reward_model_path
     )
     reward_model.to(device)
-    if len(gpu_ids) > 1:
-        reward_model = torch.nn.DataParallel(reward_model, device_ids=gpu_ids)
     reward_model.eval()
 
     if isinstance(base_model_names, str):
