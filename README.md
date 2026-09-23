@@ -84,7 +84,7 @@ Verified test-time alignment results:
 - Number of prompts: `1000`
 - Candidate counts: `1, 2, 4, 8`
 
-| Base model | Baseline mean reward | N = 1 selected reward | N = 2 selected reward | N = 4 selected reward | N = 8 selected reward |
+| Base model | Baseline mean reward | N = 1  | N = 2  | N = 4  | N = 8  |
 |---|---:|---:|---:|---:|---:|
 | Qwen2.5-0.5B-Instruct | 0.1448 | 1.0837 | 1.2118 | 2.3467 | 3.3858 |
 | Qwen2.5-1.5B-Instruct | 1.8874 | 0.2070 | 1.5848 | 2.4772 | 3.3069 |
