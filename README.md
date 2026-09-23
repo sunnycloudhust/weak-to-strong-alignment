@@ -4,7 +4,7 @@ We train Reward Model `Qwen/Qwen2.5-0.5B-Instruct`on dataset `Anthropic/hh-rlhf`
 
 ## Reward Model Results
 
-The current reward-model checkpoint was trained from `Qwen/Qwen2.5-0.5B-Instruct` on `Anthropic/hh-rlhf` using 25,000 training pairs, 1,000 evaluation pairs, and 4 epochs. The latest metrics stored in `outputs/reward_model_hh_rlhf/metrics.json` were extended with the old epoch-1 and epoch-2 records for continuity of the documented model card history.
+The current reward-model checkpoint was trained from `Qwen/Qwen2.5-0.5B-Instruct` on `Anthropic/hh-rlhf` using 25,000 training pairs, 1,000 evaluation pairs, and 4 epochs.
 
 | Epoch | Train loss | Train accuracy | Eval loss | Eval accuracy |
 |---:|---:|---:|---:|---:|
@@ -72,9 +72,6 @@ All base models are loaded in 4-bit NF4 quantization on CUDA by default:
 
 ```bash
 ./run_experiments.sh
-```
-
-Quantized base-model loading is CUDA-only and requires `accelerate` and `bitsandbytes`. It changes base-model loading only; the reward model remains in its normal precision. Use `--no-quantized` to disable it when running a non-CUDA test.
 
 Verified test-time alignment results:
 
